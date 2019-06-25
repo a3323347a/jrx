@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+    <import resource="classpath:batch_public.xml"/>
+    <!--将学生信息导入数据库-->
+    <batch:job id="FTDJOB" >
+        <batch:step id="importFileStep">
+            <batch:tasklet>
+                <batch:chunk reader="FTD_StudentReader" writer="FTD_StudentWriter" commit-interval="1000"/>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!--读取学生考试信息文件并导入数据库-->
+    <batch:job id="fileExamDetailToDb" >
+        <batch:step id="importExamDetailStep">
+            <batch:tasklet>
+                <batch:chunk reader="FTD_ExamReader" writer="FTD_ExamWriter" commit-interval="1000"/>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <!-- 读取学生信息文件配置 -->
+    <bean id="FTD_StudentReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+        <property name="resource" value="data/student.txt"/>
+        <property name="linesToSkip" value="1"/>
+        <property name="lineMapper">
+            <bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <property name="lineTokenizer">
+                    <bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+                        <!--为读取一行数据分配名称，如有多个，则此处多个值 -->
+                        <property name="names" value="id,classesId,name,sex,age"/>
+                    </bean>
+                </property>
+                <!-- 根据上面的字段如何映射成为模型，注意java 类中的read("XXX")属性 -->
+                <property name="fieldSetMapper">
+                    <bean class="com.batch.filetodatabase.StudentFieldSetMapper"/>
+                </property>
+            </bean>
+        </property>
+    </bean>
+    <!--读考试详细信息文件配置-->
+    <bean id="FTD_ExamReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+        <property name="resource" value="data/examdetail.txt"/>
+        <property name="linesToSkip" value="1"/>
+        <property name="lineMapper">
+            <bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <property name="lineTokenizer">
+                    <bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+                        <property name="names" value="id,math,chinese,english,examnumber,examtime"/>
+                    </bean>
+                </property>
+                <property name="fieldSetMapper">
+                    <bean class="com.batch.filetodatabase.ExamFieldSetMapper"/>
+                </property>
+            </bean>
+        </property>
+    </bean>
+</beans>

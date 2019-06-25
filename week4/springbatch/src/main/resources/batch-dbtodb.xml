@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+    <import resource="classpath:public-batch.xml"/>
+    <batch:job id="dbtodbJob">
+        <batch:step id="step">
+            <batch:tasklet>
+                <batch:chunk reader="jdbcItemPageReader" processor="DailySumyProcessor" writer="jdbcItemWriter" commit-interval="10000"/>
+            </batch:tasklet>
+        </batch:step>
+        <batch:listeners>
+            <batch:listener ref="jobListener"/>
+        </batch:listeners>
+    </batch:job>
+    <!--job监听器-->
+    <bean id="jobListener" class="com.batch.listener.JobListener"/>
+
+    <!--联表读取客户信息表和交易明细表并做汇总到数据库-->
+    <bean id="jdbcItemPageReader" scope="step" class="org.springframework.batch.item.database.JdbcPagingItemReader">
+        <property name="dataSource" ref="dataSourceHikari"/>
+        <property name="queryProvider" ref="refQueryProvider"/>
+        <property name="parameterValues">
+            <map>
+                <entry key="trandate" value="#{jobParameters['tran_date']}"/>
+            </map>
+        </property>
+        <property name="rowMapper" ref="dailySummaryRowMapper"/>
+    </bean>
+    <!--使用SqlPagingQueryProviderFactoryBean查询接口-->
+    <bean id="refQueryProvider" class="org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean">
+        <property name="dataSource" ref="dataSourceHikari"/>
+        <property name="selectClause" value="
+                select a.cust_id ,MAX(a.txn_datetime) as 'update_time',b.surname,
+                MAX(a.bill) as 'tran_max_amt',
+                sum(CASE WHEN trans_type='还款' THEN bill ELSE 0 END) as 'pay_amt',
+                SUM(CASE WHEN trans_type='还款' THEN 1 ELSE 0 END)as 'pay_cnt',
+                SUM(case WHEN trans_type='消费' THEN bill ELSE 0 END) as 'tran_amt',
+                SUM(CASE WHEN trans_type='消费' THEN 1 ELSE 0 END) as 'tran_cnt'"/>
+        <property name="fromClause" value="FROM transdetails a LEFT JOIN customer b ON a.cust_id = b.cust_id"/>
+        <property name="whereClause" value="where DATE_FORMAT(a.txn_datetime,'%Y-%m-%d') = :trandate"/>
+        <property name="groupClause" value="GROUP BY a.cust_id"/>
+        <property name="sortKey" value="cust_id"/>
+    </bean>
+    <!--自定义RowMapper将查询记录映射成实体类-->
+    <bean id="dailySummaryRowMapper" class="com.batch.fieldsetmapper.DailySummaryRowMapper"/>
+
+    <!--使用jdbcItemWriter写数据进数据库-->
+    <bean id="jdbcItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <property name="dataSource" ref="dataSourceHikari"/>
+        <property name="sql" value="insert into dailysummary (s_index,cust_id,update_time,trans_date,surname,tran_max_amt,
+                pay_amt,tran_cnt,pay_cnt,tran_amt) values (:sindex,:custId,:datetime,:date,:custName,:tranMaxAmt,
+                :payAmt,:tranCnt,:payCnt,:tranAmt)"/>
+        <property name="itemSqlParameterSourceProvider">
+            <bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
+        </property>
+    </bean>
+</beans>

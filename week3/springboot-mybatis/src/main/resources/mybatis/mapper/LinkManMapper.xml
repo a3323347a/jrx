@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjx.mapper.LinkManMapper">
+    <select id="getLinkManById" resultMap="Map1">
+      select a.*,b.cust_id,b.cust_address,b.cust_name
+        from cst_linkman a
+        left join cst_customer b
+        on a.lkm_cust_id = b.cust_id
+        where a.lkm_id = #{id}
+    </select>
+
+    <delete id="deleteLinkManById">
+        delete from cst_linkman where lkm_id=#{id}
+    </delete>
+
+    <!--根据联系人的外键<客户id>来查联系人，即看客户与这个联系人是否有关联关系-->
+    <select id="getLinkManBylkmcustId" resultType="com.zjx.entity.LinkMan">
+        select * from cst_linkman where lkm_cust_id = #{id}
+    </select>
+
+    <!--根据联系人的外键<客户id>来删除联系人 -->
+    <delete id="deleteBylkmcustId">
+        delete from cst_linkman where lkm_cust_id = #{id}
+    </delete>
+
+    <!--配置一对一的映射，一个联系人对应一个客户-->
+    <resultMap id="Map1" type="com.zjx.entity.LinkMan">
+        <id column="lkm_id" property="lkmId"/>
+        <result column="lkm_email" property="lkmEmail"/>
+        <result column="lkm_gender" property="lkmGender"/>
+        <result column="lkm_memo" property="lkmMemo"/>
+        <result column="lkm_mobile" property="lkmMobile"/>
+        <result column="lkm_name" property="lkmName"/>
+        <result column="lkm_phone" property="lkmPhone"/>
+        <result column="lkm_position" property="lkmPosition"/>
+        <association property="customer" javaType="com.zjx.entity.Customer">
+            <id column="cust_id" property="custId"/>
+            <result column="cust_address" property="custAddress"/>
+            <result column="cust_industry" property="custIndustry"/>
+            <result column="cust_level" property="custLevel"/>
+            <result column="cust_name" property="custName"/>
+            <result column="cust_phone" property="custPhone"/>
+            <result column="cust_source" property="custSource"/>
+        </association>
+    </resultMap>
+
+
+</mapper>

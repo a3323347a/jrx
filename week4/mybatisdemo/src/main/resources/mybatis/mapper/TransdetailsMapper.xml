@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boot.mapper.TransdetailsMapper">
+  <resultMap id="BaseResultMap" type="com.boot.model.TransDetail">
+    <id column="trans_id" jdbcType="INTEGER" property="transId" />
+    <result column="cust_id" jdbcType="INTEGER" property="custId" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+    <result column="card_nbr" jdbcType="VARCHAR" property="cardnbr" />
+    <result column="tranno" jdbcType="VARCHAR" property="tranno" />
+    <result column="month_nbr" jdbcType="INTEGER" property="monthnbr" />
+    <result column="bill" jdbcType="DECIMAL" property="bill" />
+    <result column="trans_type" jdbcType="VARCHAR" property="transtype" />
+    <result column="txn_datetime" jdbcType="TIMESTAMP" property="txndatetime" />
+  </resultMap>
+  <!--基础列字段-->
+  <sql id="Base_Column_List">
+    trans_id, cust_id, account, card_nbr, tranno, month_nbr, bill, trans_type, txn_datetime
+  </sql>
+  <select id="getAllTransDetail" resultMap="BaseResultMap">
+    select * from transdetails
+  </select>
+  <!--根据交易单号来查询-->
+  <select id="selectById" parameterType="int" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from transdetails
+    where trans_id = #{id}
+  </select>
+  <!--查询交易明细表的记录数量-->
+  <select id="countByExample" resultType="java.lang.Integer">
+    select count(*) from transdetails
+  </select>
+  <!--根据id来删除-->
+  <delete id="deleteById" parameterType="java.lang.Integer">
+    delete from transdetails
+    where trans_id = #{transId,jdbcType=INTEGER}
+  </delete>
+  <!--添加交易明细记录-->
+  <insert id="insertTransDetail" parameterType="com.boot.model.TransDetail">
+    insert into transdetails
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="transId != null">
+        trans_id,
+      </if>
+      <if test="custId != null">
+        cust_id,
+      </if>
+      <if test="account != null">
+        account,
+      </if>
+      <if test="cardnbr != null">
+        card_nbr,
+      </if>
+      <if test="tranno != null">
+        tranno,
+      </if>
+      <if test="monthnbr != null">
+        month_nbr,
+      </if>
+      <if test="bill != null">
+        bill,
+      </if>
+      <if test="transtype != null">
+        trans_type,
+      </if>
+      <if test="txndatetime != null">
+        txn_datetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="transId != null">
+        #{transId,jdbcType=INTEGER},
+      </if>
+      <if test="custId != null">
+        #{custId,jdbcType=INTEGER},
+      </if>
+      <if test="account != null">
+        #{account,jdbcType=VARCHAR},
+      </if>
+      <if test="cardnbr != null">
+        #{cardNbr,jdbcType=VARCHAR},
+      </if>
+      <if test="tranno != null">
+        #{tranno,jdbcType=VARCHAR},
+      </if>
+      <if test="monthnbr != null">
+        #{monthNbr,jdbcType=INTEGER},
+      </if>
+      <if test="bill != null">
+        #{bill,jdbcType=DECIMAL},
+      </if>
+      <if test="transtype != null">
+        #{transType,jdbcType=VARCHAR},
+      </if>
+      <if test="txndatetime != null">
+        #{txnDatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <!--更新交易明细记录，根据交易单号-->
+  <update id="updateByPrimaryKeySelective" parameterType="com.boot.model.TransDetail">
+    update transdetails
+    <set>
+      <if test="custId != null">
+        cust_id = #{custId,jdbcType=INTEGER},
+      </if>
+      <if test="account != null">
+        account = #{account,jdbcType=VARCHAR},
+      </if>
+      <if test="cardnbr != null">
+        card_nbr = #{cardNbr,jdbcType=VARCHAR},
+      </if>
+      <if test="tranno != null">
+        tranno = #{tranno,jdbcType=VARCHAR},
+      </if>
+      <if test="monthnbr != null">
+        month_nbr = #{monthNbr,jdbcType=INTEGER},
+      </if>
+      <if test="bill != null">
+        bill = #{bill,jdbcType=DECIMAL},
+      </if>
+      <if test="transtype != null">
+        trans_type = #{transType,jdbcType=VARCHAR},
+      </if>
+      <if test="txndatetime != null">
+        txn_datetime = #{txnDatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where trans_id = #{transId,jdbcType=INTEGER}
+  </update>
+</mapper>
