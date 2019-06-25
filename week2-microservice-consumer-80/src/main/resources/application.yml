@@ -1,0 +1,10 @@
+server:
+  port: 80
+
+eureka:
+  client:
+    register-with-eureka: false
+    #属性对应服务注册中心的配置内容，指定服务注册中心的位置。
+    service-url:
+      #建议配置多个节点，如果只配置主节点，如果主节点宕机，其他发现服务节点重启后将不能注册进去
+      defaultZone: http://microservice-cloud-1.com:7001/eureka/,http://microservice-cloud-2.com:7002/eureka/

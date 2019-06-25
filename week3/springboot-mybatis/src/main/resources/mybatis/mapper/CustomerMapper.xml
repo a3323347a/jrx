@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjx.mapper.CustomerMapper">
+
+    <sql id="sql1">
+         select a.*,b.lkm_id,b.lkm_name,b.lkm_gender,b.lkm_phone,b.lkm_mobile,b.lkm_position,
+          b.lkm_memo
+    </sql>
+
+    <select id="getCustomerById" resultMap="CustomerLinkManSetMap" >
+        <include refid="sql1"></include>
+        from cst_customer a
+        left join cst_linkman b
+        on a.cust_id = b.lkm_cust_id
+        where a.cust_id=#{id}
+    </select>
+
+    <insert id="addCustomer">
+        insert into cst_customer(cust_address,cust_industry,cust_level,cust_name,cust_phone,cust_source)
+          values(#{custAddress},#{custIndustry},#{custLevel},#{custName},#{custPhone},#{custSource})
+    </insert>
+
+    <update id="updateCustomerById">
+        update cst_customer set cust_address=#{custAddress},cust_industry=#{custIndustry},
+          cust_level=#{custLevel},cust_name=#{custName},cust_phone=#{custPhone},cust_source=#{custSource}
+          where cust_id=#{custId}
+    </update>
+
+    <delete id="deleteCustomerById">
+        delete from cst_customer where cust_id=#{id}
+    </delete>
+
+    <!--配置一对多映射，一个客户对应多个联系人-->
+    <resultMap id="CustomerLinkManSetMap" type="com.zjx.entity.Customer">
+        <id column="cust_id" property="custId"/>
+        <result column="cust_address" property="custAddress"/>
+        <result column="cust_industry" property="custIndustry"/>
+        <result column="cust_level" property="custLevel"/>
+        <result column="cust_name" property="custName"/>
+        <result column="cust_phone" property="custPhone"/>
+        <result column="cust_source" property="custSource"/>
+        <collection property="linkMans" ofType="com.zjx.entity.LinkMan">
+            <!--定义这个集合中元素的封装规则-->
+            <id column="lkm_id" property="lkmId"/>
+            <result column="lkm_name" property="lkmName"/>
+            <result column="lkm_gender" property="lkmGender"/>
+            <result column="lkm_phone" property="lkmPhone"/>
+            <result column="lkm_mobile" property="lkmMobile"/>
+            <result column="lkm_position" property="lkmPosition"/>
+            <result column="lkm_memo" property="lkmMemo"/>
+        </collection>
+    </resultMap>
+</mapper>
