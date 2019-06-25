@@ -1,2 +1,0 @@
-2019-06-25 15:54:55.808 -ERROR  [nio-8088-exec-2] c.b.r.SpringExceptionHandle    : occurs error when execute method ,message Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'; nested exception is java.lang.NumberFormatException: For input string: "sss"
-2019-06-25 17:02:04.991 -ERROR  [nio-8088-exec-8] c.b.r.SpringExceptionHandle    : occurs error when execute method ,message Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'; nested exception is java.lang.NumberFormatException: For input string: "sss"

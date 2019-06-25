@@ -1,7 +1,0 @@
-spring:
-  batch:
-    initializer:
-      enabled: true
-    job:
-      enabled: false
-    schema: classpath:/org/springframework/batch/core/schema-mysql.sql
